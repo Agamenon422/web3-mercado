@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tech.ada.mercado.exceptions.NotFoundException;
+import tech.ada.mercado.model.Cotacao;
 import tech.ada.mercado.model.Mercado;
 import tech.ada.mercado.service.MercadoService;
 
@@ -56,4 +57,11 @@ public class MercadoController {
                 .switchIfEmpty(Mono.error(NotFoundException::new))
                 .onErrorResume(e -> Mono.error(InternalError::new));
     }
+
+    @GetMapping("/moeda")
+    public Mono<ResponseEntity<Flux<Cotacao>>> consultaAPI(@RequestParam("moeda") String moeda){
+        return service.cotacao(moeda).collectList()
+                .map(m -> ResponseEntity.ok().body(Flux.fromIterable(m)));
+    }
+
 }
